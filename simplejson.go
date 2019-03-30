@@ -2,6 +2,7 @@ package simplejson
 
 import (
 	"bytes"
+	"database/sql/driver"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -39,6 +40,13 @@ func (j *Json) Scan(value interface{}) error {
 		return errors.New(fmt.Sprint("failed to unmarshal JSONB value ([]byte cast):", value))
 	}
 	return j.FromDB(b)
+}
+
+func (j *Json) Value() (driver.Value, error) {
+	if j == nil || j.data == nil {
+		return nil, nil
+	}
+	return j.Encode()
 }
 
 // NewJson returns a pointer to a new `Json` object
