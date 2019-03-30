@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 )
 
@@ -30,6 +31,15 @@ func (j *Json) ToDB() ([]byte, error) {
 	}
 
 	return j.Encode()
+}
+
+func (j *Json) Scan(value interface{}) error {
+	str, ok := value.(string)
+	if !ok {
+		return errors.New(fmt.Sprint("failed to unmarshal JSONB value (strcast):", value))
+	}
+	b := []byte(str)
+	return j.FromDB(b)
 }
 
 // NewJson returns a pointer to a new `Json` object
