@@ -34,11 +34,10 @@ func (j *Json) ToDB() ([]byte, error) {
 }
 
 func (j *Json) Scan(value interface{}) error {
-	str, ok := value.(string)
+	b, ok := value.([]byte)
 	if !ok {
-		return errors.New(fmt.Sprint("failed to unmarshal JSONB value (strcast):", value))
+		return errors.New(fmt.Sprint("failed to unmarshal JSONB value ([]byte cast):", value))
 	}
-	b := []byte(str)
 	return j.FromDB(b)
 }
 
