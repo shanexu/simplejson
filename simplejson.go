@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
+	"strings"
 )
 
 // returns the current implementation version
@@ -161,6 +163,34 @@ func (j *Json) Get(key string) *Json {
 		if val, ok := m[key]; ok {
 			return &Json{val}
 		}
+	}
+	if j.data == nil {
+		return &Json{nil}
+	}
+	t := reflect.TypeOf(j.data)
+	if t.Kind() != reflect.Struct {
+		return &Json{nil}
+	}
+	_, ok := t.FieldByName(key)
+	if ok {
+		v := reflect.ValueOf(j.data)
+		return &Json{v.FieldByName(key).Interface()}
+	}
+	for i := 0; i < t.NumField(); i++ {
+		jsonTag, ok := t.Field(i).Tag.Lookup("json")
+		if !ok {
+			continue
+		}
+		idx := strings.Index(jsonTag, ",")
+		if idx == -1 {
+			idx = len(jsonTag)
+		}
+		name := jsonTag[0:idx]
+		if name == key {
+			v := reflect.ValueOf(j.data)
+			return &Json{v.Field(i).Interface()}
+		}
+
 	}
 	return &Json{nil}
 }
